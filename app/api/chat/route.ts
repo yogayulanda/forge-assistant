@@ -1,5 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
-import { getPersonalityPrompt } from "@/lib/chat";
+import {
+  getPersonalityPrompt,
+  isInDeveloperProductivityScope,
+  OUT_OF_SCOPE_REPLY,
+} from "@/lib/chat";
 import { DEFAULT_PERSONALITY, type PersonalityId } from "@/constants/personalities";
 
 const ai = new GoogleGenAI({
@@ -15,6 +19,10 @@ export async function POST(req: Request) {
 
     if (!message?.trim()) {
       return Response.json({ error: "Message is required" }, { status: 400 });
+    }
+
+    if (!isInDeveloperProductivityScope(message)) {
+      return Response.json({ text: OUT_OF_SCOPE_REPLY });
     }
 
     const systemPrompt = getPersonalityPrompt(personality || DEFAULT_PERSONALITY);
