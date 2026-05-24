@@ -1,0 +1,190 @@
+/* =====================================================================
+   Forge Assistant — Design Tokens
+   Source: yogayulanda/forge-assistant (Next.js + Tailwind v4 + Gemini)
+   Aesthetic: modern AI SaaS — dark zinc canvas with cyan→blue accents,
+   glassy backdrop-blur cards, soft radial gradients in the background.
+   ===================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* ---------- Surfaces (zinc scale, dark canvas) ---------- */
+  --bg:               #09090b;  /* zinc-950 — page canvas */
+  --bg-elev-1:        #18181b;  /* zinc-900 — card body */
+  --bg-elev-1-glass:  rgb(24 24 27 / 0.60);  /* zinc-900/60 — header, chat shell */
+  --bg-elev-2-glass:  rgb(24 24 27 / 0.80);  /* zinc-900/80 — input, sidebar */
+  --bg-elev-3-glass:  rgb(39 39 42 / 0.90);  /* zinc-800/90 — assistant message */
+  --bg-input:         #09090b;  /* zinc-950 — textarea/select */
+  --bg-chip:          rgb(255 255 255 / 0.05);
+  --bg-codeblock:     #0b1220;  /* near-black with cool tint, for <pre> */
+
+  /* ---------- Text (zinc scale) ---------- */
+  --fg-1: #f4f4f5;  /* zinc-100 — primary body */
+  --fg-2: #d4d4d8;  /* zinc-300 — subdued body */
+  --fg-3: #a1a1aa;  /* zinc-400 — secondary */
+  --fg-4: #71717a;  /* zinc-500 — tertiary / labels */
+  --fg-inverse: #09090b; /* zinc-950 — on cyan buttons */
+
+  /* ---------- Borders / dividers ---------- */
+  --border-1: rgb(255 255 255 / 0.10);  /* white/10 — default card edge */
+  --border-2: rgb(255 255 255 / 0.15);  /* white/15 — chip / code edge */
+  --border-input: #3f3f46;             /* zinc-700 — input idle */
+  --border-input-focus: rgb(103 232 249 / 0.60); /* cyan-300/60 */
+  --border-accent-soft: rgb(103 232 249 / 0.30); /* cyan-300/30 */
+  --border-accent: rgb(103 232 249 / 0.50);
+
+  /* ---------- Accent (cyan → blue → teal) ---------- */
+  --accent-cyan-200: #a5f3fc;
+  --accent-cyan-300: #67e8f9;  /* primary action color */
+  --accent-cyan-400: #22d3ee;
+  --accent-cyan-600: #0891b2;  /* user-msg gradient start */
+  --accent-blue-300: #93c5fd;
+  --accent-blue-500: #3b82f6;
+  --accent-blue-700: #1d4ed8;  /* user-msg gradient end */
+  --accent-teal-200: #99f6e4;
+  --accent-on:       #09090b;  /* text color when sitting on cyan */
+
+  /* tint overlays for badges/chips */
+  --accent-bg-soft:  rgb(34 211 238 / 0.10);   /* cyan-400/10 */
+  --accent-fg-soft:  #a5f3fc;                  /* cyan-200 */
+
+  /* ---------- Semantic ---------- */
+  --danger-bg:      rgb(239 68 68 / 0.10);     /* red-500/10 */
+  --danger-border:  rgb(248 113 113 / 0.30);   /* red-400/30 */
+  --danger-fg:      #fecaca;                   /* red-200 */
+
+  /* ---------- Gradients ---------- */
+  --grad-page:
+    radial-gradient(circle at 20% 0%, rgb(34 211 238 / 0.10), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgb(59 130 246 / 0.10), transparent 35%),
+    var(--bg);
+  --grad-user-bubble: linear-gradient(135deg, var(--accent-cyan-600) 0%, var(--accent-blue-700) 100%);
+  --grad-headline:    linear-gradient(90deg, var(--accent-cyan-300) 0%, var(--accent-blue-300) 50%, var(--accent-teal-200) 100%);
+
+  /* ---------- Shadows ---------- */
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.40);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.55);
+
+  /* ---------- Radii ---------- */
+  --radius-sm:    0.5rem;   /*  8px — icon tile */
+  --radius-md:    0.75rem;  /* 12px — small chip / code block */
+  --radius-lg:    0.875rem; /* 14px — quick-action card hover */
+  --radius-xl:    1rem;     /* 16px — input wrapper, message bubble small */
+  --radius-2xl:   1rem;     /* 16px — message bubble, alert box */
+  --radius-3xl:   1.5rem;   /* 24px — header, chat shell */
+  --radius-pill:  9999px;   /* pills, scrollbar thumb, badges */
+
+  /* ---------- Spacing scale (Tailwind compatible) ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+
+  /* ---------- Type ---------- */
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --fs-xs:   0.75rem;   /* 12px — chips, eyebrow labels */
+  --fs-sm:   0.875rem;  /* 14px — secondary text, select */
+  --fs-base: 1rem;      /* 16px */
+  --fs-md:   1.05rem;   /* markdown h3/h4 */
+  --fs-lg:   1.2rem;    /* markdown h2 */
+  --fs-xl:   1.35rem;   /* markdown h1 */
+  --fs-2xl:  1.875rem;  /* page h1, mobile */
+  --fs-3xl:  2.25rem;   /* page h1, desktop (md:text-4xl) */
+
+  --lh-tight:  1.25;
+  --lh-snug:   1.45;
+  --lh-normal: 1.65;
+
+  --tracking-wide: 0.025em;
+
+  /* ---------- Transitions ---------- */
+  --t-fast:  150ms ease;
+  --t-base:  200ms ease;
+}
+
+/* =====================================================================
+   Semantic element styles — use these for ad-hoc HTML outside Tailwind.
+   ===================================================================== */
+
+body.forge {
+  margin: 0;
+  min-height: 100%;
+  background: var(--grad-page);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-snug);
+  -webkit-font-smoothing: antialiased;
+}
+
+.forge h1, .forge .h1 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-tight);
+  background: var(--grad-headline);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+}
+
+.forge h2, .forge .h2 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-tight);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+.forge h3, .forge .h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: var(--fs-md);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+.forge p, .forge .body {
+  color: var(--fg-2);
+  font-size: var(--fs-base);
+  line-height: var(--lh-snug);
+}
+
+.forge .subtle {
+  color: var(--fg-3);
+  font-size: var(--fs-sm);
+}
+
+.forge .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--fg-4);
+}
+
+.forge code, .forge .code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  padding: 0.15rem 0.35rem;
+}
+
+.forge pre {
+  font-family: var(--font-mono);
+  background: var(--bg-codeblock);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  overflow-x: auto;
+}

@@ -26,7 +26,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const chatRef = useRef<HTMLElement | null>(null);
 
   const personalityName = useMemo(
     () => PERSONALITIES.find((item) => item.id === personality)?.label || "Assistant",
@@ -34,7 +34,7 @@ export default function Home() {
   );
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading, error]);
 
   async function sendMessage() {
@@ -118,7 +118,10 @@ export default function Home() {
           <PersonalitySelect value={personality} onChange={setPersonality} />
         </div>
 
-        <section className="flex-1 overflow-y-auto rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur md:p-5">
+        <section
+          ref={chatRef}
+          className="flex-1 overflow-y-auto rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur md:p-5"
+        >
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-wide text-zinc-500">Active tone: {personalityName}</p>
 
@@ -128,11 +131,9 @@ export default function Home() {
 
             {loading && (
               <div className="mr-auto max-w-[90%] rounded-2xl border border-white/10 bg-zinc-800/90 px-4 py-3 text-zinc-300">
-                Gemini is thinking...
+                Gemini is thinking<span className="inline-block animate-pulse">…</span>
               </div>
             )}
-
-            <div ref={bottomRef} />
           </div>
         </section>
 

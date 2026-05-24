@@ -1,33 +1,14 @@
-import { useEffect, useRef } from "react";
-import { resizeTextarea } from "@/lib/utils";
-
-type Props = {
-  input: string;
-  loading: boolean;
-  activeActionLabel: string;
-  onInputChange: (value: string) => void;
-  onSend: () => void;
-};
-
-export function ChatInput({
-  input,
-  loading,
-  activeActionLabel,
-  onInputChange,
-  onSend,
-}: Props) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    if (textareaRef.current) resizeTextarea(textareaRef.current);
+function ChatInput({ input, loading, activeActionLabel, onInputChange, onSend }) {
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (!ref.current) return;
+    ref.current.style.height = "0px";
+    ref.current.style.height = Math.min(ref.current.scrollHeight, 220) + "px";
   }, [input]);
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSend();
-      }}
+      onSubmit={(e) => { e.preventDefault(); onSend(); }}
       className="mt-4 rounded-2xl border border-white/10 bg-zinc-900/80 p-3"
     >
       {activeActionLabel && (
@@ -35,18 +16,14 @@ export function ChatInput({
           Quick Action: {activeActionLabel}
         </div>
       )}
-
       <div className="flex items-end gap-2">
         <textarea
-          ref={textareaRef}
+          ref={ref}
           value={input}
           onChange={(e) => onInputChange(e.target.value)}
           placeholder="Ask Forge Assistant anything..."
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              onSend();
-            }
+            if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(); }
           }}
           className="max-h-[220px] min-h-14 flex-1 resize-none rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none transition focus:border-cyan-300/60"
         />
@@ -61,3 +38,5 @@ export function ChatInput({
     </form>
   );
 }
+
+window.ChatInput = ChatInput;

@@ -1,8 +1,90 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap");
 
+/* =====================================================================
+   Forge Assistant — Design Tokens
+   ===================================================================== */
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+  /* Surfaces */
+  --background:        #09090b;
+  --foreground:        #f4f4f5;
+  --bg-elev-1:         #18181b;
+  --bg-elev-1-glass:   rgb(24 24 27 / 0.60);
+  --bg-elev-2-glass:   rgb(24 24 27 / 0.80);
+  --bg-elev-3-glass:   rgb(39 39 42 / 0.90);
+  --bg-input:          #09090b;
+  --bg-codeblock:      #0b1220;
+
+  /* Text */
+  --fg-1: #f4f4f5;
+  --fg-2: #d4d4d8;
+  --fg-3: #a1a1aa;
+  --fg-4: #71717a;
+  --fg-inverse: #09090b;
+
+  /* Borders */
+  --border-1:           rgb(255 255 255 / 0.10);
+  --border-2:           rgb(255 255 255 / 0.15);
+  --border-input:       #3f3f46;
+  --border-input-focus: rgb(103 232 249 / 0.60);
+  --border-accent-soft: rgb(103 232 249 / 0.30);
+  --border-accent:      rgb(103 232 249 / 0.50);
+
+  /* Accent */
+  --accent-cyan-200: #a5f3fc;
+  --accent-cyan-300: #67e8f9;
+  --accent-cyan-400: #22d3ee;
+  --accent-cyan-600: #0891b2;
+  --accent-blue-300: #93c5fd;
+  --accent-blue-500: #3b82f6;
+  --accent-blue-700: #1d4ed8;
+  --accent-teal-200: #99f6e4;
+  --accent-on:       #09090b;
+  --accent-bg-soft:  rgb(34 211 238 / 0.10);
+  --accent-fg-soft:  #a5f3fc;
+
+  /* Semantic */
+  --danger-bg:     rgb(239 68 68 / 0.10);
+  --danger-border: rgb(248 113 113 / 0.30);
+  --danger-fg:     #fecaca;
+
+  /* Gradients */
+  --grad-page:
+    radial-gradient(circle at 20% 0%, rgb(34 211 238 / 0.10), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgb(59 130 246 / 0.10), transparent 35%),
+    var(--background);
+  --grad-user-bubble: linear-gradient(135deg, var(--accent-cyan-600) 0%, var(--accent-blue-700) 100%);
+  --grad-headline:    linear-gradient(90deg, var(--accent-cyan-300) 0%, var(--accent-blue-300) 50%, var(--accent-teal-200) 100%);
+
+  /* Shadows */
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.40);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.55);
+
+  /* Radii */
+  --radius-sm:   0.5rem;
+  --radius-md:   0.75rem;
+  --radius-lg:   0.875rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1rem;
+  --radius-3xl:  1.5rem;
+  --radius-pill: 9999px;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Typography */
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Transitions */
+  --t-fast: 150ms ease;
+  --t-base: 200ms ease;
 }
 
 @theme inline {
@@ -23,12 +105,10 @@ body {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.1), transparent 35%),
-    radial-gradient(circle at 80% 0%, rgba(59, 130, 246, 0.1), transparent 35%),
-    var(--background);
+  background: var(--grad-page);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar {
@@ -40,10 +120,13 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background: #374151;
 }
 
+/* =====================================================================
+   Markdown rendering
+   ===================================================================== */
 .markdown-body {
   font-size: 0.95rem;
   line-height: 1.65;
@@ -62,18 +145,10 @@ body {
   line-height: 1.25;
 }
 
-.markdown-body h1 {
-  font-size: 1.35rem;
-}
-
-.markdown-body h2 {
-  font-size: 1.2rem;
-}
-
+.markdown-body h1 { font-size: 1.35rem; }
+.markdown-body h2 { font-size: 1.2rem; }
 .markdown-body h3,
-.markdown-body h4 {
-  font-size: 1.05rem;
-}
+.markdown-body h4 { font-size: 1.05rem; }
 
 .markdown-body ul,
 .markdown-body ol {
@@ -86,9 +161,9 @@ body {
 }
 
 .markdown-body code {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.375rem;
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 0.08);
   padding: 0.15rem 0.35rem;
   font-family: var(--font-mono), monospace;
   font-size: 0.9em;
@@ -96,9 +171,9 @@ body {
 
 .markdown-body pre {
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 0.75rem;
-  background: #0b1220;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  background: var(--bg-codeblock);
   padding: 0.85rem;
 }
 
