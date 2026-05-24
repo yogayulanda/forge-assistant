@@ -1,63 +1,62 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-
-type Message = {
-  role: "user" | "assistant";
-  content: string;
-};
-
-const quickActions = [
-  {
-    label: "Generate Jira Ticket",
-    prompt:
-      "Act as a senior software engineer. Convert this requirement into Jira tickets with Backend task, Frontend task, priority, story point, and acceptance criteria:\n\n",
-  },
-  {
-    label: "Analyze Error Log",
-    prompt:
-      "Act as a senior backend engineer. Analyze this error log. Explain probable root cause, severity, impact, and recommended fix:\n\n",
-  },
-  {
-    label: "Generate API Docs",
-    prompt:
-      "Act as an API documentation assistant. Generate clean API documentation from this requirement or endpoint description:\n\n",
-  },
-];
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { QuickActions } from "@/components/quick-actions";
+import { ChatMessage } from "@/components/chat-message";
+import { PersonalitySelect } from "@/components/personality-select";
+import { ChatInput } from "@/components/chat-input";
+import { CHAT_TIMEOUT_MS } from "@/constants/app";
+import { DEFAULT_PERSONALITY, PERSONALITIES, type PersonalityId } from "@/constants/personalities";
+import type { Message } from "@/lib/types";
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
       content:
-        "Hi, I’m Forge Assistant — an AI productivity assistant for developers powered by Gemini. Ask me to generate Jira tickets, analyze errors, or create API documentation.",
+        "Welcome to Forge Assistant. Pick an AI personality and I can help you generate Jira tickets, analyze errors, or draft API documentation.",
     },
   ]);
-
   const [input, setInput] = useState("");
   const [activePrompt, setActivePrompt] = useState("");
+  const [activeActionLabel, setActiveActionLabel] = useState("");
+  const [personality, setPersonality] = useState<PersonalityId>(DEFAULT_PERSONALITY);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  const personalityName = useMemo(
+    () => PERSONALITIES.find((item) => item.id === personality)?.label || "Assistant",
+    [personality]
+  );
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, error]);
 
   async function sendMessage() {
-    if (!input.trim() || loading) return;
+    const trimmed = input.trim();
 
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-    };
+    if (loading) return;
 
-    const finalPrompt = activePrompt ? activePrompt + input : input;
+    if (!trimmed) {
+      setError("Please enter a message before sending.");
+      return;
+    }
 
-    setMessages((prev) => [...prev, userMessage]);
+    setError("");
+
+    const finalPrompt = activePrompt ? `${activePrompt}${trimmed}` : trimmed;
+
+    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInput("");
     setLoading(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
 
     try {
       const res = await fetch("/api/chat", {
@@ -67,80 +66,68 @@ export default function Home() {
         },
         body: JSON.stringify({
           message: finalPrompt,
+          personality,
         }),
+        signal: controller.signal,
       });
 
       const data = await res.json();
 
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed API response.");
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: data.text || data.error || "No response generated.",
+          content: data.text || "No response generated.",
         },
       ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Something went wrong while contacting Gemini API.",
-        },
-      ]);
+    } catch (caught) {
+      const fallbackMessage =
+        caught instanceof Error && caught.name === "AbortError"
+          ? "Request timed out. Gemini took too long to respond, please try again."
+          : caught instanceof Error
+            ? caught.message
+            : "Something went wrong while contacting Gemini API.";
+
+      setMessages((prev) => [...prev, { role: "assistant", content: fallbackMessage }]);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
       setActivePrompt("");
+      setActiveActionLabel("");
     }
   }
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-6">
-        <header className="mb-6 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 shadow-xl">
-          <p className="text-sm text-zinc-400">Gemini API Final Project</p>
-          <h1 className="mt-1 text-3xl font-bold">Forge Assistant</h1>
-          <p className="mt-2 max-w-2xl text-zinc-300">
-            AI Developer Productivity Assistant powered by Gemini API. Generate
-            Jira tickets, analyze engineering errors, and create API
-            documentation instantly.
-          </p>
-        </header>
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 px-4 py-5 md:px-6 md:py-8">
+        <Header />
 
-        <section className="mb-4 grid gap-3 md:grid-cols-3">
-          {quickActions.map((action) => (
-            <button
-              key={action.label}
-              onClick={() => {
-                setActivePrompt(action.prompt);
-                setInput("");
-              }}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4 text-left transition hover:border-zinc-600 hover:bg-zinc-800"
-            >
-              <p className="font-semibold">{action.label}</p>
-              <p className="mt-1 text-sm text-zinc-400">
-                Click, then type your requirement or log.
-              </p>
-            </button>
-          ))}
-        </section>
+        <div className="grid gap-3 lg:grid-cols-[1fr_280px]">
+          <QuickActions
+            onSelect={(prompt, label) => {
+              setActivePrompt(prompt);
+              setActiveActionLabel(label);
+              setError("");
+            }}
+            activeLabel={activeActionLabel}
+          />
+          <PersonalitySelect value={personality} onChange={setPersonality} />
+        </div>
 
-        <section className="flex-1 overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4">
+        <section className="flex-1 overflow-y-auto rounded-3xl border border-white/10 bg-zinc-900/60 p-4 shadow-xl backdrop-blur md:p-5">
           <div className="space-y-4">
+            <p className="text-xs uppercase tracking-wide text-zinc-500">Active tone: {personalityName}</p>
+
             {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`prose prose-invert rounded-2xl p-4 ${
-                  message.role === "user"
-                    ? "ml-auto max-w-[80%] bg-blue-600 text-white"
-                    : "mr-auto max-w-[90%] bg-zinc-800 text-zinc-100"
-                }`}
-              >
-                <ReactMarkdown>{message.content}</ReactMarkdown>
-              </div>
+              <ChatMessage key={index} message={message} />
             ))}
 
             {loading && (
-              <div className="mr-auto max-w-[80%] rounded-2xl bg-zinc-800 p-4 text-zinc-300">
+              <div className="mr-auto max-w-[90%] rounded-2xl border border-white/10 bg-zinc-800/90 px-4 py-3 text-zinc-300">
                 Gemini is thinking...
               </div>
             )}
@@ -149,40 +136,19 @@ export default function Home() {
           </div>
         </section>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendMessage();
-          }}
-          className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-3"
-        >
-          {activePrompt && (
-            <div className="mb-2 rounded-xl bg-zinc-800 px-3 py-2 text-sm text-zinc-300">
-              Mode active:{" "}
-              {quickActions.find((a) => a.prompt === activePrompt)?.label}
-            </div>
-          )}
+        {error && (
+          <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</p>
+        )}
 
-          <div className="flex gap-2">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Forge Assistant anything..."
-              className="min-h-14 flex-1 resize-none rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-zinc-100 outline-none focus:border-zinc-500"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-xl bg-white px-5 font-semibold text-zinc-950 transition hover:bg-zinc-200 disabled:opacity-50"
-            >
-              Send
-            </button>
-          </div>
-        </form>
+        <ChatInput
+          input={input}
+          loading={loading}
+          activeActionLabel={activeActionLabel}
+          onInputChange={setInput}
+          onSend={sendMessage}
+        />
 
-        <p className="mt-4 text-center text-sm text-zinc-500">
-          Built with Next.js, Tailwind CSS, and Gemini API
-        </p>
+        <Footer />
       </div>
     </main>
   );

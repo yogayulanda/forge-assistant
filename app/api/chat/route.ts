@@ -1,4 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
+import { getPersonalityPrompt } from "@/lib/chat";
+import { DEFAULT_PERSONALITY, type PersonalityId } from "@/constants/personalities";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
@@ -6,25 +8,33 @@ const ai = new GoogleGenAI({
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const { message, personality } = (await req.json()) as {
+      message?: string;
+      personality?: PersonalityId;
+    };
 
-    if (!message) {
+    if (!message?.trim()) {
       return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
+    const systemPrompt = getPersonalityPrompt(personality || DEFAULT_PERSONALITY);
+
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: message,
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `${systemPrompt}\n\nUser request:\n${message}` }],
+        },
+      ],
     });
 
-    return Response.json({
-      text: response.text,
-    });
+    return Response.json({ text: response.text });
   } catch (error) {
     console.error("Gemini API Error:", error);
 
     return Response.json(
-      { error: "Failed to generate AI response." },
+      { error: "Failed to generate AI response from Gemini API." },
       { status: 500 }
     );
   }
