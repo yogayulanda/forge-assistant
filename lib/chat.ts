@@ -13,62 +13,89 @@ export function getPersonalityPrompt(personality: PersonalityId) {
   );
 }
 
-const IN_SCOPE_KEYWORDS = [
-  "code",
-  "coding",
-  "programming",
-  "software",
-  "developer",
-  "engineering",
-  "bug",
-  "debug",
-  "error",
-  "stack trace",
-  "exception",
-  "refactor",
-  "architecture",
-  "system design",
-  "api",
-  "endpoint",
-  "database",
-  "query",
-  "sql",
-  "schema",
-  "test",
-  "unit test",
-  "integration test",
-  "ci",
-  "cd",
-  "deploy",
-  "devops",
-  "jira",
-  "ticket",
-  "story point",
-  "acceptance criteria",
-  "documentation",
-  "markdown",
-  "typescript",
-  "javascript",
-  "react",
-  "next.js",
-  "tailwind",
-  "node",
-  "backend",
-  "frontend",
-  "microservice",
-  "performance",
-  "optimization",
-  "algorithm",
-  "pull request",
-  "review",
-  "commit",
-  "git",
-  "terminal",
-];
-
 export function isInDeveloperProductivityScope(message: string) {
   const normalized = message.toLowerCase();
-  return IN_SCOPE_KEYWORDS.some((keyword) => normalized.includes(keyword));
+
+  // Detect obvious technical/code patterns first (language-agnostic).
+  if (
+    /```|{.*}|;|=>|function\s|\bclass\s|\bimport\s|\bconst\s|\blet\s|\bvar\s/i.test(
+      normalized
+    )
+  ) {
+    return true;
+  }
+
+  // Broad multilingual developer intent cues.
+  const DEV_INTENT = [
+    "code",
+    "coding",
+    "programming",
+    "software",
+    "developer",
+    "engineering",
+    "bug",
+    "debug",
+    "error",
+    "api",
+    "database",
+    "test",
+    "deploy",
+    "jira",
+    "documentation",
+    "typescript",
+    "javascript",
+    "react",
+    "next.js",
+    "backend",
+    "frontend",
+    "git",
+    "terminal",
+    "kode",
+    "pemrograman",
+    "debug",
+    "error",
+    "perbaiki kode",
+    "bantu saya memperbaiki",
+    "arsitektur",
+    "dokumentasi api",
+    "basis data",
+    "query",
+    "pengujian",
+    "deploy",
+  ];
+
+  if (DEV_INTENT.some((keyword) => normalized.includes(keyword))) {
+    return true;
+  }
+
+  // Reject only when the request is clearly unrelated to developer workflows.
+  const CLEARLY_OUT_OF_SCOPE = [
+    "president",
+    "presiden",
+    "politic",
+    "politik",
+    "election",
+    "pemilu",
+    "cuaca",
+    "weather",
+    "zodiac",
+    "horoscope",
+    "celebrity",
+    "selebriti",
+    "football score",
+    "skor bola",
+    "resep masakan",
+    "recipe",
+    "movie recommendation",
+    "rekomendasi film",
+  ];
+
+  if (CLEARLY_OUT_OF_SCOPE.some((keyword) => normalized.includes(keyword))) {
+    return false;
+  }
+
+  // Allow uncertain cases to avoid blocking valid requests in other languages.
+  return true;
 }
 
 export const OUT_OF_SCOPE_REPLY =
